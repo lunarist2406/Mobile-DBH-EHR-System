@@ -1,21 +1,28 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
-import { router } from 'expo-router';
 
-import OTPForm from './components/OTPForm';
-import LoginForm from './components/LoginForm';
-import RegisterForm from './components/RegisterForm';
 import ForgotPasswordForm from './components/ForgotPasswordForm';
+import LoginForm from './components/LoginForm';
+import OTPForm from './components/OTPForm';
+import RegisterForm from './components/RegisterForm';
 
-import { AuthStep } from '@/types/types';
+import { AuthStep, Role } from '@/types/types';
 
 export default function AuthView() {
   const [step, setStep] = useState<AuthStep>('LOGIN');
   const [email, setEmail] = useState('');
 
-  const handleLoginSuccess = () => {
-    router.replace('/(tabs)');
+  const handleLoginSuccess = (role: Role) => {
+    if (role === 'PATIENT') {
+      router.replace('patient' as any);   // đúng với app/(patient)/index.tsx
+    } else {
+      router.replace('doctor' as any);    // đúng với app/(doctor)/index.tsx
+    }
   };
+
+
+
 
   return (
     <View style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -50,7 +57,7 @@ export default function AuthView() {
       {step === 'OTP' && (
         <OTPForm
           email={email}
-          onVerified={handleLoginSuccess}
+          onVerified={() => handleLoginSuccess('PATIENT')}
           onBack={() => setStep('LOGIN')}
         />
       )}

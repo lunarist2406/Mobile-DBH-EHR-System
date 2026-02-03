@@ -1,3 +1,5 @@
+import { mockLogin } from '@/service/auth.service';
+import { Role } from '@/types/types';
 import { Eye, EyeOff, Lock, Mail, ShieldCheck } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
@@ -5,10 +7,11 @@ import { Animated, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, V
 interface Props {
   onForgot: () => void;
   onRegister: () => void;
-  onSuccess: () => void;
+   onSuccess: (role: Role) => void
 }
 
 export default function LoginForm({ onForgot, onRegister, onSuccess }: Props) {
+  const [role, setRole] = useState<Role>('PATIENT');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -205,27 +208,60 @@ export default function LoginForm({ onForgot, onRegister, onSuccess }: Props) {
               Forgot password?
             </Text>
           </Pressable>
+            {/* Role Selector (Mock) */}
+          <View style={{ flexDirection: 'row', marginBottom: 20 }}>
+            {(['PATIENT', 'DOCTOR'] as Role[]).map((r) => {
+              const active = role === r;
+              return (
+                <Pressable
+                  key={r}
+                  onPress={() => setRole(r)}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 12,
+                    marginHorizontal: 6,
+                    borderRadius: 12,
+                    backgroundColor: active ? '#3A8AFF' : '#F3F4F6',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: active ? '#fff' : '#374151',
+                      fontWeight: '700',
+                    }}
+                  >
+                    {r === 'PATIENT' ? 'Patient' : 'Doctor'}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
 
           {/* Sign In Button */}
-          <Pressable 
+          <Pressable
             style={({ pressed }) => [
               btnStyle,
               !canSubmit && { opacity: 0.5, backgroundColor: '#E5E7EB' },
-              pressed && canSubmit && { 
-                opacity: 0.9,
-                transform: [{ scale: 0.98 }]
-              }
+              pressed && canSubmit && { transform: [{ scale: 0.98 }] },
             ]}
             disabled={!canSubmit}
-            onPress={onSuccess}
+            onPress={() => {
+              try {
+                const user = mockLogin(email, password);
+
+                // đảm bảo role sync với backend (không tin UI selector)
+                onSuccess(user.role);
+              } catch (e) {
+                console.log(e);
+                // sau này show toast / error text
+              }
+            }}
+
           >
-            <Text style={[
-              btnTextStyle,
-              !canSubmit && { color: '#9CA3AF' }
-            ]}>
-              Sign In
-            </Text>
+            <Text style={btnTextStyle}>Sign In</Text>
           </Pressable>
+
         </Animated.View>
 
         {/* Footer */}
