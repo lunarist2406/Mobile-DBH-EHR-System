@@ -1,34 +1,31 @@
 // components/EHRCard3D.tsx
+import {
+    Activity,
+    Calendar,
+    ChevronRight,
+    FileText,
+    Fingerprint,
+    MapPin,
+    Microscope,
+    Pill,
+    Share2,
+    Shield,
+    ShieldCheck,
+    User,
+} from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  Animated,
-  Platform,
+    Animated,
+    Dimensions,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import {
-  Shield,
-  Share2,
-  Info,
-  Hash,
-  Activity,
-  FileText,
-  Pill,
-  Microscope,
-  User,
-  MapPin,
-  Zap,
-  Fingerprint,
-  Link,
-  ShieldCheck,
-  Calendar,
-} from 'lucide-react-native';
+import EHRDetailModal from './EHRDetailModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_WIDTH = SCREEN_WIDTH - 48;
+const CARD_WIDTH = SCREEN_WIDTH;
 
 interface EHRRecord {
   id: string;
@@ -38,14 +35,20 @@ interface EHRRecord {
     full_name: string;
     dob: string;
     blood_type: string;
+    gender?: string;
+    allergies?: string[];
   };
   hospital: {
     name: string;
     license_number: string;
+    address?: string;
+    phone?: string;
   };
   doctor: {
     full_name: string;
     license_number: string;
+    specialty?: string;
+    department?: string;
   };
   created_at: string;
   blockchain_tx_hash: string;
@@ -53,58 +56,36 @@ interface EHRRecord {
   integrity_status: string;
   file_hash: string;
   ehr_id: string;
+  additional_data?: {
+    diagnosis?: string;
+    treatment?: string;
+    medications?: string[];
+    notes?: string;
+  };
 }
 
 interface Props {
   record: EHRRecord;
   onSyncPress?: () => void;
+  compact?: boolean;
 }
 
-const EHRCard3D: React.FC<Props> = ({ record, onSyncPress }) => {
-  const [isFlipped, setIsFlipped] = useState(false);
+const EHRCard3D: React.FC<Props> = ({ record, onSyncPress, compact = false }) => {
+  const [showDetail, setShowDetail] = useState(false);
   const rotateY = useRef(new Animated.Value(0)).current;
-  const opacity = useRef(new Animated.Value(1)).current;
-
-  const frontOpacity = rotateY.interpolate({
-    inputRange: [0, 90],
-    outputRange: [1, 0],
-    extrapolate: 'clamp',
-  });
-
-  const backOpacity = rotateY.interpolate({
-    inputRange: [90, 180],
-    outputRange: [0, 1],
-    extrapolate: 'clamp',
-  });
-
-  const frontRotate = rotateY.interpolate({
-    inputRange: [0, 180],
-    outputRange: ['0deg', '180deg'],
-  });
-
-  const backRotate = rotateY.interpolate({
-    inputRange: [0, 180],
-    outputRange: ['180deg', '360deg'],
-  });
+  const [isFlipped, setIsFlipped] = useState(false);
 
   const flipCard = () => {
+    if (compact) return; // Disable flip in compact mode
+    
     const toValue = isFlipped ? 0 : 180;
     setIsFlipped(!isFlipped);
     
-    Animated.parallel([
-      Animated.timing(rotateY, {
-        toValue,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 0.5,
-        duration: 400,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      opacity.setValue(1);
-    });
+    Animated.timing(rotateY, {
+      toValue,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
   };
 
   const getTypeIcon = () => {
@@ -135,352 +116,380 @@ const EHRCard3D: React.FC<Props> = ({ record, onSyncPress }) => {
 
   const theme = getThemeColor();
 
-  return (
-    <TouchableOpacity
-      activeOpacity={0.9}
-      onPress={flipCard}
-      style={styles.container}
-    >
-      {/* Front Card */}
-      <Animated.View
-        style={[
-          styles.card,
-          styles.frontCard,
-          {
-            backgroundColor: theme.bg,
-            opacity: frontOpacity,
-            transform: [
-              { rotateY: frontRotate },
-              { perspective: 1000 },
-            ],
-          },
-        ]}
-      >
-        {/* Header */}
-        <View style={styles.frontHeader}>
-          <View style={styles.verifiedBadge}>
-            <ShieldCheck size={14} color="#22D3EE" />
-            <Text style={styles.verifiedText}>EHR Protocol V.{record.current_version}</Text>
-          </View>
-          <View style={styles.typeIcon}>
-            {getTypeIcon()}
-          </View>
-        </View>
+  // Front card rotation
+  const frontRotate = rotateY.interpolate({
+    inputRange: [0, 180],
+    outputRange: ['0deg', '180deg'],
+  });
 
-        {/* Patient Info */}
-        <View style={styles.patientInfo}>
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatar}>
-              <Fingerprint size={28} color="#FFFFFF" />
+  // Back card rotation
+  const backRotate = rotateY.interpolate({
+    inputRange: [0, 180],
+    outputRange: ['180deg', '360deg'],
+  });
+
+  if (compact) {
+    // Compact mode for Home screen
+    return (
+      <>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => setShowDetail(true)}
+          style={styles.compactContainer}
+        >
+          <View style={[styles.compactCard, { backgroundColor: theme.bg }]}>
+            <View style={styles.compactHeader}>
+              <View style={styles.compactIcon}>
+                {getTypeIcon()}
+              </View>
+              <View style={styles.compactTitle}>
+                <Text style={styles.compactType}>
+                  {record.report_type.replace('_', ' ')}
+                </Text>
+                <Text style={styles.compactDate}>{record.created_at}</Text>
+              </View>
+              <ChevronRight size={20} color="#FFFFFF90" />
             </View>
-            <View style={styles.patientDetails}>
-              <Text style={styles.patientName} numberOfLines={1}>
+            
+            <View style={styles.compactContent}>
+              <Text style={styles.compactPatient} numberOfLines={1}>
                 {record.patient.full_name}
               </Text>
-              <View style={styles.patientMeta}>
-                <View style={styles.metaRow}>
-                  <Calendar size={12} color="#FFFFFF90" />
-                  <Text style={styles.metaText}>{record.patient.dob}</Text>
+              <View style={styles.compactMeta}>
+                <View style={styles.compactMetaItem}>
+                  <User size={12} color="#FFFFFF90" />
+                  <Text style={styles.compactMetaText}>{record.doctor.full_name}</Text>
                 </View>
-                <View style={styles.bloodTypeBadge}>
-                  <Text style={styles.bloodTypeText}>Type: {record.patient.blood_type}</Text>
+                <View style={styles.compactMetaItem}>
+                  <MapPin size={12} color="#FFFFFF90" />
+                  <Text style={styles.compactMetaText} numberOfLines={1}>
+                    {record.hospital.name}
+                  </Text>
                 </View>
               </View>
             </View>
+            
+            <View style={styles.compactFooter}>
+              <View style={[styles.verifiedBadge, { backgroundColor: `${theme.dark}50` }]}>
+                <ShieldCheck size={12} color="#FFFFFF" />
+                <Text style={styles.verifiedText}>VERIFIED</Text>
+              </View>
+              <View style={styles.idBadge}>
+                <Text style={styles.idText}>#{record.ehr_id.split('-')[1]}</Text>
+              </View>
+            </View>
           </View>
-        </View>
+        </TouchableOpacity>
 
-        {/* Medical Context */}
-        <View style={styles.medicalContext}>
-          <View style={styles.contextHeader}>
-            <View>
-              <Text style={styles.contextLabel}>Medical Context</Text>
-              <Text style={styles.contextValue}>
-                {record.report_type.replace('_', ' ')}
-              </Text>
-            </View>
-            <View style={styles.integrityBadge}>
-              <Text style={styles.integrityText}>BLOCK VERIFIED</Text>
-            </View>
-          </View>
-          <View style={styles.hospitalInfo}>
-            <MapPin size={14} color="#22D3EE" />
-            <Text style={styles.hospitalName} numberOfLines={1}>
-              {record.hospital.name}
-            </Text>
-          </View>
-        </View>
+        <EHRDetailModal
+          visible={showDetail}
+          record={record}
+          onClose={() => setShowDetail(false)}
+        />
+      </>
+    );
+  }
 
-        {/* Footer */}
-        <View style={styles.frontFooter}>
-          <View style={styles.doctorInfo}>
-            <View style={styles.doctorIcon}>
-              <User size={16} color="#FFFFFF" />
-            </View>
-            <View>
-              <Text style={styles.doctorLabel}>Physician</Text>
-              <Text style={styles.doctorName} numberOfLines={1}>
-                {record.doctor.full_name}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.timestamp}>
-            <Text style={styles.timestampLabel}>Timestamp</Text>
-            <Text style={styles.timestampValue}>{record.created_at}</Text>
-          </View>
-        </View>
-      </Animated.View>
-
-      {/* Back Card */}
-      <Animated.View
-        style={[
-          styles.card,
-          styles.backCard,
-          {
-            backgroundColor: '#0A0F1E',
-            opacity: backOpacity,
-            transform: [
-              { rotateY: backRotate },
-              { perspective: 1000 },
-            ],
-          },
-        ]}
+  // Full 3D mode for Records screen
+  return (
+    <>
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={flipCard}
+        style={styles.container}
       >
-        {/* Header */}
-        <View style={styles.backHeader}>
-          <View style={styles.auditHeader}>
-            <View style={styles.auditTitle}>
-              <Zap size={18} color="#22D3EE" />
-              <Text style={styles.auditText}>Audit Ledger Node</Text>
+        {/* Front Card */}
+        <Animated.View
+          style={[
+            styles.card,
+            styles.frontCard,
+            {
+              backgroundColor: theme.bg,
+              transform: [
+                { rotateY: frontRotate },
+                { perspective: 1000 },
+              ],
+            },
+          ]}
+        >
+          <View style={styles.frontContent}>
+            <View style={styles.frontHeader}>
+              <View style={styles.verifiedBadge}>
+                <ShieldCheck size={14} color="#22D3EE" />
+                <Text style={styles.verifiedText}>EHR V.{record.current_version}</Text>
+              </View>
+              {getTypeIcon()}
             </View>
-            <View style={styles.idBadge}>
-              <Text style={styles.idText}>ID: {record.ehr_id.split('-')[0]}</Text>
-            </View>
-          </View>
-        </View>
 
-        {/* Blockchain Info */}
-        <View style={styles.blockchainInfo}>
-          {/* TXID */}
-          <View style={styles.infoSection}>
-            <View style={styles.infoHeader}>
-              <Text style={styles.infoLabel}>Blockchain TXID</Text>
-              <Link size={12} color="#64748B" />
+            <View style={styles.patientSection}>
+              <View style={styles.avatar}>
+                <Fingerprint size={24} color="#FFFFFF" />
+              </View>
+              <View style={styles.patientInfo}>
+                <Text style={styles.patientName} numberOfLines={1}>
+                  {record.patient.full_name}
+                </Text>
+                <View style={styles.patientMeta}>
+                  <View style={styles.metaItem}>
+                    <Calendar size={12} color="#FFFFFF90" />
+                    <Text style={styles.metaText}>{record.patient.dob}</Text>
+                  </View>
+                  <View style={styles.bloodBadge}>
+                    <Text style={styles.bloodText}>{record.patient.blood_type}</Text>
+                  </View>
+                </View>
+              </View>
             </View>
-            <View style={styles.hashContainer}>
-              <Text style={styles.hashText} numberOfLines={1}>
-                {record.blockchain_tx_hash}
-              </Text>
-            </View>
-          </View>
 
-          {/* Block Height & Status */}
-          <View style={styles.grid}>
-            <View style={styles.gridItem}>
-              <Text style={styles.infoLabel}>Block Height</Text>
-              <View style={styles.blockHeightContainer}>
-                <View style={styles.pulseDot} />
-                <Text style={styles.blockHeight}>
-                  {record.block_number.toLocaleString()}
+            <View style={styles.detailsSection}>
+              <View style={styles.detailRow}>
+                <User size={14} color="#FFFFFF90" />
+                <Text style={styles.detailText}>{record.doctor.full_name}</Text>
+              </View>
+              <View style={styles.detailRow}>
+                <MapPin size={14} color="#FFFFFF90" />
+                <Text style={styles.detailText} numberOfLines={1}>
+                  {record.hospital.name}
                 </Text>
               </View>
             </View>
-            <View style={styles.gridItem}>
-              <Text style={styles.infoLabel}>Status</Text>
-              <View style={styles.statusContainer}>
-                <Shield size={14} color="#10B981" />
-                <Text style={styles.statusText}>{record.integrity_status}ED</Text>
+
+            <View style={styles.frontFooter}>
+              <Text style={styles.timestamp}>{record.created_at}</Text>
+              <TouchableOpacity
+                style={styles.detailButton}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  setShowDetail(true);
+                }}
+              >
+                <Text style={styles.detailButtonText}>VIEW DETAILS</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Animated.View>
+
+        {/* Back Card */}
+        <Animated.View
+          style={[
+            styles.card,
+            styles.backCard,
+            {
+              backgroundColor: '#0F172A',
+              transform: [
+                { rotateY: backRotate },
+                { perspective: 1000 },
+              ],
+            },
+          ]}
+        >
+          <View style={styles.backContent}>
+            <View style={styles.backHeader}>
+              <View style={styles.blockchainBadge}>
+                <Shield size={16} color="#22D3EE" />
+                <Text style={styles.blockchainText}>BLOCKCHAIN VERIFIED</Text>
               </View>
             </View>
-          </View>
 
-          {/* Content Hash */}
-          <View style={styles.infoSection}>
-            <Text style={styles.infoLabel}>Content Hash (SHA-256)</Text>
-            <View style={styles.hashContainer}>
-              <Text style={styles.smallHashText} numberOfLines={1}>
-                {record.file_hash}
-              </Text>
+            <View style={styles.blockchainInfo}>
+              <View style={styles.blockchainItem}>
+                <Text style={styles.blockchainLabel}>Transaction Hash</Text>
+                <Text style={styles.blockchainValue} numberOfLines={1}>
+                  {record.blockchain_tx_hash.substring(0, 24)}...
+                </Text>
+              </View>
+              
+              <View style={styles.blockchainGrid}>
+                <View style={styles.gridItem}>
+                  <Text style={styles.blockchainLabel}>Block #</Text>
+                  <Text style={styles.blockchainNumber}>
+                    {record.block_number.toLocaleString()}
+                  </Text>
+                </View>
+                <View style={styles.gridItem}>
+                  <Text style={styles.blockchainLabel}>Status</Text>
+                  <View style={styles.statusBadge}>
+                    <Text style={styles.statusText}>{record.integrity_status}ED</Text>
+                  </View>
+                </View>
+              </View>
+              
+              <View style={styles.blockchainItem}>
+                <Text style={styles.blockchainLabel}>EHR ID</Text>
+                <Text style={styles.ehrId}>{record.ehr_id}</Text>
+              </View>
+            </View>
+
+            <View style={styles.backFooter}>
+              <TouchableOpacity
+                style={styles.syncButton}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onSyncPress?.();
+                }}
+              >
+                <Share2 size={14} color="#22D3EE" />
+                <Text style={styles.syncText}>SYNC</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.viewDetailsButton}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  setShowDetail(true);
+                }}
+              >
+                <Text style={styles.viewDetailsText}>VIEW FULL DETAILS</Text>
+              </TouchableOpacity>
             </View>
           </View>
+        </Animated.View>
+      </TouchableOpacity>
 
-          {/* Licenses */}
-          <View style={styles.grid}>
-            <View style={styles.gridItem}>
-              <Text style={styles.infoLabel}>Hosp License</Text>
-              <Text style={styles.licenseText}>{record.hospital.license_number}</Text>
-            </View>
-            <View style={styles.gridItem}>
-              <Text style={styles.infoLabel}>Doc License</Text>
-              <Text style={styles.licenseText}>{record.doctor.license_number}</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Footer */}
-        <View style={styles.backFooter}>
-          <View style={styles.footerLeft}>
-            <Hash size={12} color="#64748B" />
-            <Text style={styles.footerText}>Distributed Hash Ledger</Text>
-          </View>
-          <TouchableOpacity
-            style={styles.syncButton}
-            onPress={onSyncPress}
-            activeOpacity={0.8}
-          >
-            <Share2 size={12} color="#22D3EE" />
-            <Text style={styles.syncButtonText}>SYNC NODE</Text>
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
-
-      {/* Hint */}
-      {!isFlipped && (
-        <View style={styles.hintContainer}>
-          <Info size={12} color="#22D3EE" />
-          <Text style={styles.hintText}>Tap to verify audit chain</Text>
-        </View>
-      )}
-    </TouchableOpacity>
+      <EHRDetailModal
+        visible={showDetail}
+        record={record}
+        onClose={() => setShowDetail(false)}
+      />
+    </>
   );
 };
 
 const styles = StyleSheet.create({
+  // Compact mode styles (for Home screen)
+  compactContainer: {
+    width: SCREEN_WIDTH - 32,
+    marginHorizontal: 16,
+    marginBottom: 12,
+  },
+  compactCard: {
+    borderRadius: 16,
+    padding: 16,
+  },
+  compactHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  compactIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF20',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  compactTitle: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  compactType: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 2,
+  },
+  compactDate: {
+    fontSize: 11,
+    color: '#FFFFFF90',
+    fontWeight: '500',
+  },
+  compactContent: {
+    marginBottom: 12,
+  },
+  compactPatient: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: 6,
+  },
+  compactMeta: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  compactMetaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    flex: 1,
+  },
+  compactMetaText: {
+    fontSize: 12,
+    color: '#FFFFFF90',
+    flexShrink: 1,
+  },
+  compactFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  
+  // Full 3D mode styles
   container: {
     width: CARD_WIDTH,
-    height: 320,
-    marginHorizontal: 24,
-    marginBottom: 48,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.25,
-        shadowRadius: 25,
-      },
-      android: {
-        elevation: 20,
-      },
-    }),
+    height: 280,
+    marginBottom: 36,
   },
   card: {
-    width: '100%',
+    width: '90%',
     height: '100%',
-    borderRadius: 32,
-    padding: 24,
+    borderRadius: 24,
+    padding: 20,
     position: 'absolute',
     backfaceVisibility: 'hidden',
     borderWidth: 1,
     overflow: 'hidden',
   },
   frontCard: {
-    borderColor: '#FFFFFF30',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 15 },
-        shadowOpacity: 0.3,
-        shadowRadius: 30,
-      },
-      android: {
-        elevation: 15,
-      },
-    }),
+    borderColor: '#FFFFFF20',
   },
   backCard: {
     borderColor: '#1E293B',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 15 },
-        shadowOpacity: 0.3,
-        shadowRadius: 30,
-      },
-      android: {
-        elevation: 15,
-      },
-    }),
+  },
+  frontContent: {
+    flex: 1,
   },
   frontHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   verifiedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF20',
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: '#FFFFFF30',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    gap: 6,
   },
   verifiedText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '800',
     color: '#FFFFFF',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    marginLeft: 6,
+    letterSpacing: 0.5,
   },
-  typeIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: '#00000040',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#FFFFFF20',
-  },
-  patientInfo: {
-    marginBottom: 20,
-  },
-  avatarContainer: {
+  patientSection: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 20,
   },
   avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
+    width: 48,
+    height: 48,
+    borderRadius: 12,
     backgroundColor: '#FFFFFF20',
-    borderWidth: 1,
-    borderColor: '#FFFFFF30',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
+    marginRight: 12,
   },
-  patientDetails: {
+  patientInfo: {
     flex: 1,
   },
   patientName: {
-    fontSize: 22,
-    fontWeight: '900',
+    fontSize: 18,
+    fontWeight: '800',
     color: '#FFFFFF',
     marginBottom: 6,
   },
@@ -489,86 +498,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
-  metaRow: {
+  metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
   },
   metaText: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 12,
     color: '#FFFFFF90',
+    fontWeight: '500',
   },
-  bloodTypeBadge: {
+  bloodBadge: {
     backgroundColor: '#00000040',
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 3,
     borderRadius: 6,
   },
-  bloodTypeText: {
-    fontSize: 10,
+  bloodText: {
+    fontSize: 11,
     fontWeight: '700',
     color: '#FFFFFF',
   },
-  medicalContext: {
-    backgroundColor: '#FFFFFF15',
-    borderRadius: 20,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#FFFFFF20',
+  detailsSection: {
+    gap: 10,
     marginBottom: 20,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
   },
-  contextHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  contextLabel: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#FFFFFF80',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    marginBottom: 4,
-  },
-  contextValue: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#FFFFFF',
-  },
-  integrityBadge: {
-    backgroundColor: '#10B98140',
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#10B98160',
-  },
-  integrityText: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: '#10B981',
-  },
-  hospitalInfo: {
+  detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  hospitalName: {
-    fontSize: 14,
-    fontWeight: '600',
+  detailText: {
+    fontSize: 13,
+    fontWeight: '500',
     color: '#FFFFFF',
     flex: 1,
   },
@@ -578,236 +540,149 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 'auto',
   },
-  doctorInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+  timestamp: {
+    fontSize: 12,
+    color: '#FFFFFF90',
+    fontWeight: '500',
   },
-  doctorIcon: {
-    width: 32,
-    height: 32,
+  detailButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 10,
     backgroundColor: '#FFFFFF20',
     borderWidth: 1,
-    borderColor: '#FFFFFF30',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: '#FFFFFF40',
   },
-  doctorLabel: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#FFFFFF80',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    marginBottom: 2,
-  },
-  doctorName: {
-    fontSize: 12,
-    fontWeight: '700',
+  detailButtonText: {
+    fontSize: 11,
+    fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
-  timestamp: {
-    alignItems: 'flex-end',
-  },
-  timestampLabel: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#FFFFFF80',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    marginBottom: 2,
-  },
-  timestampValue: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#FFFFFF',
+  
+  // Back card styles
+  backContent: {
+    flex: 1,
   },
   backHeader: {
     marginBottom: 20,
   },
-  auditHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  auditTitle: {
+  blockchainBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-  },
-  auditText: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-  },
-  idBadge: {
-    backgroundColor: '#1E293B',
+    backgroundColor: '#22D3EE15',
+    alignSelf: 'flex-start',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#22D3EE30',
   },
-  idText: {
+  blockchainText: {
     fontSize: 10,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-    fontWeight: '600',
+    fontWeight: '800',
     color: '#22D3EE',
+    letterSpacing: 0.5,
   },
   blockchainInfo: {
     flex: 1,
     gap: 16,
   },
-  infoSection: {
-    gap: 8,
+  blockchainItem: {
+    gap: 6,
   },
-  infoHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  infoLabel: {
+  blockchainLabel: {
     fontSize: 10,
-    fontWeight: '900',
-    color: '#64748B',
+    fontWeight: '700',
+    color: '#94A3B8',
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
-  hashContainer: {
-    backgroundColor: '#1E293B90',
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#334155',
+  blockchainValue: {
+    fontSize: 12,
+    fontFamily: 'monospace',
+    color: '#CBD5E1',
   },
-  hashText: {
-    fontSize: 10,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-    fontWeight: '600',
-    color: '#22D3EE',
-  },
-  smallHashText: {
-    fontSize: 9,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-    fontWeight: '600',
-    color: '#64748B',
-  },
-  grid: {
+  blockchainGrid: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 16,
   },
   gridItem: {
     flex: 1,
-    gap: 8,
+    gap: 6,
   },
-  blockHeightContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: '#1E293B90',
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#334155',
-  },
-  pulseDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#22D3EE',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#22D3EE',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.5,
-        shadowRadius: 5,
-      },
-      android: {
-        elevation: 5,
-      },
-    }),
-  },
-  blockHeight: {
-    fontSize: 14,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  blockchainNumber: {
+    fontSize: 20,
+    fontFamily: 'monospace',
     fontWeight: '700',
     color: '#FFFFFF',
   },
-  statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: '#1E293B90',
-    padding: 12,
-    borderRadius: 12,
+  statusBadge: {
+    backgroundColor: '#10B98120',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#10B98140',
+    alignSelf: 'flex-start',
   },
   statusText: {
-    fontSize: 12,
-    fontWeight: '900',
+    fontSize: 11,
+    fontWeight: '800',
     color: '#10B981',
-    textTransform: 'uppercase',
   },
-  licenseText: {
-    fontSize: 12,
+  ehrId: {
+    fontSize: 14,
     fontWeight: '700',
-    color: '#CBD5E1',
-    marginTop: 4,
+    color: '#FFFFFF',
   },
   backFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#1E293B',
     marginTop: 'auto',
-  },
-  footerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  footerText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#64748B',
   },
   syncButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     backgroundColor: '#22D3EE15',
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#22D3EE30',
   },
-  syncButtonText: {
+  syncText: {
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '800',
     color: '#22D3EE',
+    letterSpacing: 0.5,
   },
-  hintContainer: {
-    position: 'absolute',
-    bottom: -30,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
+  viewDetailsButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: '#3B82F6',
   },
-  hintText: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: '#64748B',
-    textTransform: 'uppercase',
-    letterSpacing: 3,
+  viewDetailsText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+  },
+  idBadge: {
+    backgroundColor: '#FFFFFF20',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  idText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
   },
 });
 

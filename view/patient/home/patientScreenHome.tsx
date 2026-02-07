@@ -37,7 +37,14 @@ export default function PatientHome() {
       <View style={styles.container}>
         {/* Header Section */}
         <PatientHeader />
-        <View style={styles.sectionContent}>
+        
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          bounces={true}
+        >
+         <View style={styles.sectionWrapper}>
           <EHRCard3D 
             record={{
               id: '1',
@@ -66,13 +73,6 @@ export default function PatientHome() {
             onSyncPress={() => console.log('Sync node')}
           />
         </View>
-        
-        <ScrollView 
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          bounces={true}
-        >
           {/* Insights Section */}
           <View style={styles.sectionWrapper}>
             <View style={styles.sectionHeader}>
