@@ -1,17 +1,25 @@
 import { mockLogin } from '@/service/auth.service';
 import { RoleName } from '@/types/types';
-import { Eye, EyeOff, Lock, Mail, ShieldCheck } from 'lucide-react-native';
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
-import { Animated, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
+import { 
+  Animated, 
+  Image, 
+  KeyboardAvoidingView, 
+  Platform, 
+  Pressable, 
+  Text, 
+  TextInput, 
+  View 
+} from 'react-native';
 
 interface Props {
   onForgot: () => void;
   onRegister: () => void;
-   onSuccess: (role: RoleName) => void
+  onSuccess: (role: RoleName) => void;
 }
 
 export default function LoginForm({ onForgot, onRegister, onSuccess }: Props) {
-  const [role, setRole] = useState<RoleName>('PATIENT');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -84,48 +92,60 @@ export default function LoginForm({ onForgot, onRegister, onSuccess }: Props) {
               style={{
                 width: 80,
                 height: 80,
-                backgroundColor: '#F3F7FF',
-                borderRadius: 24,
+                backgroundColor: '#FFFFFF',
+                borderRadius: 20,
                 justifyContent: 'center',
                 alignItems: 'center',
                 marginBottom: 20,
-                borderWidth: 3,
-                borderColor: '#3A8AFF',
+                borderWidth: 2,
+                borderColor: '#EFF6FF',
                 transform: [
                   { scale: logoScale },
                   { rotate: logoRotateInterpolate }
                 ],
                 shadowColor: '#3A8AFF',
-                shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 0.3,
-                shadowRadius: 16,
-                elevation: 8,
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.15,
+                shadowRadius: 12,
+                elevation: 6,
+                overflow: 'hidden',
               }}
             >
-              <ShieldCheck size={40} color="#3A8AFF" strokeWidth={2.5} />
+              <Image
+                source={require('@/assets/images/android-chrome-192x192.png')}
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 14,
+                }}
+                resizeMode="contain"
+              />
             </Animated.View>
             
-            <Text style={{
-              fontSize: 32,
-              fontWeight: '900',
-              color: '#000D28',
-              marginBottom: 8,
-              letterSpacing: -0.5,
-            }}>
-              Welcome Back
-            </Text>
-            <Text style={{
-              fontSize: 15,
-              color: '#6B7280',
-              textAlign: 'center',
-            }}>
-              Sign in to access your health records
-            </Text>
+            <View style={{ alignItems: 'center', marginTop: 8 }}>
+              <Text style={{
+                fontSize: 28,
+                fontWeight: '800',
+                color: '#0F2A5F', // Navy Blue
+                marginBottom: 6,
+                letterSpacing: -0.5,
+              }}>
+                DecentralEHR
+              </Text>
+              <Text style={{
+                fontSize: 14,
+                color: '#64748B',
+                textAlign: 'center',
+                lineHeight: 20,
+              }}>
+                Secure, Decentralized Health Records
+              </Text>
+            </View>
           </View>
 
           {/* Email Input with Icon */}
           <View style={{ marginBottom: 20 }}>
-            <Text style={labelStyle}>Email</Text>
+            <Text style={labelStyle}>Email Address</Text>
             <View style={{ position: 'relative' }}>
               <View style={{
                 position: 'absolute',
@@ -136,7 +156,7 @@ export default function LoginForm({ onForgot, onRegister, onSuccess }: Props) {
                 <Mail size={20} color={emailFocused ? '#3A8AFF' : '#9CA3AF'} />
               </View>
               <TextInput 
-                placeholder="Enter your email" 
+                placeholder="you@example.com" 
                 placeholderTextColor="#9CA3AF"
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -186,6 +206,7 @@ export default function LoginForm({ onForgot, onRegister, onSuccess }: Props) {
                   right: 16,
                   top: 18,
                   zIndex: 1,
+                  padding: 4,
                 }}
               >
                 {showPassword ? (
@@ -198,9 +219,14 @@ export default function LoginForm({ onForgot, onRegister, onSuccess }: Props) {
           </View>
 
           {/* Forgot Password */}
-          <Pressable onPress={onForgot} style={{ marginBottom: 32 }}>
+          <Pressable 
+            onPress={onForgot} 
+            style={{ 
+              marginBottom: 32,
+              alignSelf: 'flex-end',
+            }}
+          >
             <Text style={{ 
-              textAlign: 'right', 
               color: '#3A8AFF',
               fontSize: 14,
               fontWeight: '600',
@@ -208,6 +234,7 @@ export default function LoginForm({ onForgot, onRegister, onSuccess }: Props) {
               Forgot password?
             </Text>
           </Pressable>
+
           {/* Sign In Button */}
           <Pressable
             style={({ pressed }) => [
@@ -219,7 +246,6 @@ export default function LoginForm({ onForgot, onRegister, onSuccess }: Props) {
             onPress={() => {
               try {
                 const user = mockLogin(email, password);
-
                 // đảm bảo role sync với backend (không tin UI selector)
                 onSuccess(user.role);
               } catch (e) {
@@ -227,7 +253,6 @@ export default function LoginForm({ onForgot, onRegister, onSuccess }: Props) {
                 // sau này show toast / error text
               }
             }}
-
           >
             <Text style={btnTextStyle}>Sign In</Text>
           </Pressable>
@@ -247,8 +272,13 @@ export default function LoginForm({ onForgot, onRegister, onSuccess }: Props) {
             backgroundColor: '#E5E7EB',
             marginBottom: 24,
           }} />
-          <Text style={{ color: '#6B7280', marginBottom: 12, fontSize: 14 }}>
-            Don't have an account?
+          <Text style={{ 
+            color: '#64748B', 
+            marginBottom: 16, 
+            fontSize: 15,
+            fontWeight: '500',
+          }}>
+            New to DecentralEHR?
           </Text>
           <Pressable 
             onPress={onRegister}
@@ -258,9 +288,10 @@ export default function LoginForm({ onForgot, onRegister, onSuccess }: Props) {
                 paddingHorizontal: 32,
                 borderWidth: 2,
                 borderColor: '#3A8AFF',
-                borderRadius: 16,
+                borderRadius: 14,
+                backgroundColor: pressed ? '#F3F7FF' : '#FFFFFF',
               },
-              pressed && { opacity: 0.7, backgroundColor: '#F3F7FF' }
+              pressed && { transform: [{ scale: 0.98 }] }
             ]}
           >
             <Text style={{ 
@@ -271,6 +302,16 @@ export default function LoginForm({ onForgot, onRegister, onSuccess }: Props) {
               Create Account
             </Text>
           </Pressable>
+          
+          {/* App Version/Info */}
+          <Text style={{ 
+            color: '#94A3B8', 
+            marginTop: 24, 
+            fontSize: 12,
+            textAlign: 'center',
+          }}>
+            Secure blockchain-based health records system
+          </Text>
         </Animated.View>
       </View>
     </KeyboardAvoidingView>
@@ -282,12 +323,13 @@ const labelStyle = {
   fontWeight: '600' as const,
   color: '#374151',
   marginBottom: 8,
+  letterSpacing: -0.2,
 };
 
 const inputStyle = {
   borderWidth: 1.5,
   borderColor: '#E5E7EB',
-  borderRadius: 16,
+  borderRadius: 14,
   padding: 16,
   fontSize: 16,
   color: '#000D28',
@@ -307,7 +349,7 @@ const focusedInputStyle = {
 const btnStyle = {
   backgroundColor: '#3A8AFF',
   paddingVertical: 18,
-  borderRadius: 16,
+  borderRadius: 14,
   shadowColor: '#3A8AFF',
   shadowOffset: { width: 0, height: 6 },
   shadowOpacity: 0.3,

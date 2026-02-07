@@ -1,18 +1,18 @@
+import { Bell, Search } from 'lucide-react-native';
 import React from 'react';
 import {
-  View,
+  Image,
+  Platform,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  StyleSheet,
-  Platform,
+  View,
 } from 'react-native';
-import { Bell, Search, Shield } from 'lucide-react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
 interface HeaderProps {
@@ -21,7 +21,7 @@ interface HeaderProps {
   onSearchPress?: () => void;
   onLogoPress?: () => void;
 }
-
+import android from '../../../../assets/'
 export const PatientHeader: React.FC<HeaderProps> = ({
   notificationCount = 1,
   onNotificationPress,
@@ -53,6 +53,17 @@ export const PatientHeader: React.FC<HeaderProps> = ({
     scale.value = withSpring(1);
   };
 
+  // Sử dụng logo tùy theo platform cho hiệu quả tốt nhất
+  const getLogoSource = () => {
+    if (Platform.OS === 'android') {
+      // Sử dụng logo 512x512 cho Android, chất lượng cao
+      return require('../../../../assets/images/android-chrome-512x512.png');
+    } else {
+      // Sử dụng logo 192x192 cho iOS
+      return require('../../../../assets/images/apple-touch-icon.png');
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Logo Section */}
@@ -64,11 +75,15 @@ export const PatientHeader: React.FC<HeaderProps> = ({
         activeOpacity={0.8}
       >
         <View style={styles.logoIcon}>
-          <Shield size={24} color="#3A8AFF" fill="#3A8AFF" />
+          <Image
+            source={getLogoSource()}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
         </View>
         <View style={styles.logoTextContainer}>
-          <Text style={styles.logoTitle}>EHR</Text>
-          <Text style={styles.logoSubtitle}>Systems</Text>
+          <Text style={styles.logoTitle}>DecentralEHR</Text>
+          <Text style={styles.logoSubtitle}>Secure Health Records</Text>
         </View>
       </AnimatedTouchableOpacity>
 
@@ -132,43 +147,54 @@ const styles = StyleSheet.create({
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   
   logoIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: '#EFF6FF',
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
     borderWidth: 1,
-    borderColor: '#DBEAFE',
+    borderColor: '#EFF6FF',
+    shadowColor: '#3A8AFF',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  
+  logoImage: {
+    width: 32,
+    height: 32,
   },
   
   logoTextContainer: {
     flexDirection: 'column',
+    flex: 1,
   },
   
   logoTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#1E293B',
-    letterSpacing: -0.5,
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#0F2A5F', // Navy Blue
+    letterSpacing: -0.3,
   },
   
   logoSubtitle: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '500',
     color: '#64748B',
-    letterSpacing: 0.5,
-    marginTop: -2,
+    marginTop: 2,
   },
   
   actionsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
   },
   
   actionButton: {
@@ -179,7 +205,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#E2E8F0',
     position: 'relative',
   },
   
@@ -195,6 +221,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+    elevation: 2,
   },
   
   notificationText: {
