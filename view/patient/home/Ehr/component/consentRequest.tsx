@@ -66,15 +66,6 @@ export default function ConsentRequests() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.titleRow}>
-          <FileCheck size={20} color="#4F46E5" strokeWidth={2.5} />
-          <Text style={styles.title}>Yêu Cầu Chia Sẻ Dữ Liệu</Text>
-        </View>
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{CONSENTS.filter(c => c.status === 'pending').length}</Text>
-        </View>
-      </View>
 
       <View style={styles.list}>
         {CONSENTS.map((consent) => {

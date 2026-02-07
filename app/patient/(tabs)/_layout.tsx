@@ -1,23 +1,34 @@
-import React from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
 import { Tabs } from 'expo-router';
-import { 
-  Home, 
-  FileText, 
-  Calendar, 
-  Search as SearchIcon,
-  Settings as SettingsIcon,
-  Shield,
+import {
+    Calendar,
+    Home,
+    Search as SearchIcon,
+    User,
+    FileText,
+    Bell,
+    Shield
 } from 'lucide-react-native';
+import React from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [
+          styles.tabBar,
+          {
+            height: Platform.OS === 'ios' ? 84 : 70,
+            paddingBottom: Platform.OS === 'ios' ? insets.bottom : 12,
+          }
+        ],
         tabBarActiveTintColor: '#3A8AFF',
         tabBarInactiveTintColor: '#94A3B8',
         tabBarLabelStyle: styles.tabBarLabel,
+        tabBarItemStyle: styles.tabBarItem,
         headerShown: false,
         tabBarHideOnKeyboard: true,
       }}
@@ -25,13 +36,14 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Trang chủ',
           tabBarIcon: ({ color, size, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
               <Home 
-                size={focused ? 22 : 20} 
+                size={22} 
                 color={focused ? '#3A8AFF' : color} 
                 fill={focused ? '#3A8AFF' : 'none'}
+                strokeWidth={focused ? 2.5 : 2}
               />
             </View>
           ),
@@ -40,13 +52,14 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="records"
         options={{
-          title: 'EHR Records',
+          title: 'Hồ sơ',
           tabBarIcon: ({ color, size, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <Shield 
-                size={focused ? 22 : 20} 
+              <FileText 
+                size={22} 
                 color={focused ? '#3A8AFF' : color} 
                 fill={focused ? '#3A8AFF' : 'none'}
+                strokeWidth={focused ? 2.5 : 2}
               />
             </View>
           ),
@@ -55,43 +68,48 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="appointments"
         options={{
-          title: 'Appointments',
+          title: 'Lịch hẹn',
           tabBarIcon: ({ color, size, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
               <Calendar 
-                size={focused ? 22 : 20} 
+                size={22} 
                 color={focused ? '#3A8AFF' : color} 
                 fill={focused ? '#3A8AFF' : 'none'}
+                strokeWidth={focused ? 2.5 : 2}
               />
             </View>
           ),
         }}
       />
+      {/* Sử dụng 'search' thay vì 'notifications' */}
       <Tabs.Screen
         name="search"
         options={{
-          title: 'Search',
+          title: 'Tìm kiếm',
           tabBarIcon: ({ color, size, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
               <SearchIcon 
-                size={focused ? 22 : 20} 
+                size={22} 
                 color={focused ? '#3A8AFF' : color} 
                 fill={focused ? '#3A8AFF' : 'none'}
+                strokeWidth={focused ? 2.5 : 2}
               />
             </View>
           ),
         }}
       />
+      {/* Sử dụng 'settings' thay vì 'profile' */}
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
+          title: 'Cài đặt',
           tabBarIcon: ({ color, size, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <SettingsIcon 
-                size={focused ? 22 : 20} 
+              <User 
+                size={22} 
                 color={focused ? '#3A8AFF' : color} 
                 fill={focused ? '#3A8AFF' : 'none'}
+                strokeWidth={focused ? 2.5 : 2}
               />
             </View>
           ),
@@ -103,29 +121,33 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    height: Platform.OS === 'ios' ? 90 : 70,
-    paddingTop: Platform.OS === 'ios' ? 8 : 4,
-    paddingBottom: Platform.OS === 'ios' ? 30 : 16,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: '#E2E8F0',
+    position: 'absolute',
+    left: 0,
+    right: 0,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.08,
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.1,
         shadowRadius: 12,
       },
       android: {
-        elevation: 8,
+        elevation: 16,
+        borderTopWidth: 0,
       },
     }),
+  },
+  tabBarItem: {
+    paddingVertical: Platform.OS === 'ios' ? 12 : 8,
   },
   tabBarLabel: {
     fontSize: 11,
     fontWeight: '600',
-    marginTop: 2,
-    letterSpacing: 0.2,
+    marginTop: Platform.OS === 'ios' ? 2 : 4,
+    marginBottom: Platform.OS === 'ios' ? 0 : 4,
   },
   iconContainer: {
     width: 44,
@@ -137,5 +159,16 @@ const styles = StyleSheet.create({
   },
   iconContainerActive: {
     backgroundColor: '#EFF6FF',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#3A8AFF',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
 });

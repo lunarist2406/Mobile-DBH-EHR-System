@@ -21,7 +21,6 @@ interface HeaderProps {
   onSearchPress?: () => void;
   onLogoPress?: () => void;
 }
-import android from '../../../../assets/'
 export const PatientHeader: React.FC<HeaderProps> = ({
   notificationCount = 1,
   onNotificationPress,
@@ -82,8 +81,8 @@ export const PatientHeader: React.FC<HeaderProps> = ({
           />
         </View>
         <View style={styles.logoTextContainer}>
-          <Text style={styles.logoTitle}>DecentralEHR</Text>
-          <Text style={styles.logoSubtitle}>Secure Health Records</Text>
+          <Text style={styles.logoTitle}>Decentral EHR</Text>
+          <Text style={styles.logoSubtitle}>Hồ Sơ Y Tế Phi Tập Trung </Text>
         </View>
       </AnimatedTouchableOpacity>
 

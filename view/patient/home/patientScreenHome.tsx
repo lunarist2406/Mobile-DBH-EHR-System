@@ -10,7 +10,6 @@ import {
   Platform,
 } from 'react-native';
 
-import InsightCards from './components/InsightCards';
 import FloatingAIButton from './components/FloatingAIButton';
 import { MOCK_PATIENT_DASHBOARD } from './ehr.mock';
 import AccessLogItem from './Ehr/component/accesslog';
@@ -51,53 +50,52 @@ export default function PatientHome() {
               report_type: 'LAB',
               current_version: 2,
               patient: {
-                full_name: 'Jane Elizabeth',
+                full_name: 'Nguyễn Văn An',
                 dob: '1985-06-15',
                 blood_type: 'O+',
               },
               hospital: {
-                name: 'City Hospital',
-                license_number: 'HOSP-12345',
+                name: 'Bệnh viện Đa khoa Thành phố',
+                license_number: 'BV-12345',
               },
               doctor: {
-                full_name: 'Dr. Sarah Johnson',
-                license_number: 'DOC-67890',
+                full_name: 'BS. Lê Thị Bình',
+                license_number: 'BS-67890',
               },
-              created_at: '2024-03-15 10:30',
+              created_at: '15-03-2024 10:30',
               blockchain_tx_hash: '0x1a2b3c4d5e6f7890abcdef1234567890',
               block_number: 1234567,
-              integrity_status: 'VERIFI',
+              integrity_status: 'ĐÃ XÁC MINH',
               file_hash: 'sha256:abcdef123456...',
               ehr_id: 'EHR-2024-001',
             }}
-            onSyncPress={() => console.log('Sync node')}
+            onSyncPress={() => console.log('Đồng bộ node')}
           />
         </View>
-          {/* Insights Section */}
+          {/* Yêu cầu Đồng thuận */}
           <View style={styles.sectionWrapper}>
             <View style={styles.sectionHeader}>
               <View style={styles.sectionHeaderLeft}>
                 <View style={styles.sectionIndicator} />
-                <Text style={styles.sectionTitle}>Health Insights</Text>
+                <Text style={styles.sectionTitle}>Yêu cầu cấp quyền</Text>
               </View>
               <TouchableOpacity>
-                <Text style={styles.seeAllText}>See All</Text>
+                <Text style={styles.seeAllText}>Xem thêm</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.sectionContent}>
-              <InsightCards items={insights} />
+              <ConsentRequests />
             </View>
           </View>
-
-          {/* Access Log Section */}
+          {/* Truy cập Gần đây */}
           <View style={styles.sectionWrapper}>
             <View style={styles.sectionHeader}>
               <View style={styles.sectionHeaderLeft}>
                 <View style={styles.sectionIndicator} />
-                <Text style={styles.sectionTitle}>Recent Access</Text>
+                <Text style={styles.sectionTitle}>Truy cập Gần đây</Text>
               </View>
               <TouchableOpacity>
-                <Text style={styles.seeAllText}>View All</Text>
+                <Text style={styles.seeAllText}>Xem thêm</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.sectionContent}>
@@ -111,33 +109,17 @@ export default function PatientHome() {
             </View>
           </View>
 
-          {/* Consent Requests Section */}
-          <View style={styles.sectionWrapper}>
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionHeaderLeft}>
-                <View style={styles.sectionIndicator} />
-                <Text style={styles.sectionTitle}>Consent Requests</Text>
-              </View>
-              <View style={styles.badgeContainer}>
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>2 New</Text>
-                </View>
-              </View>
-            </View>
-            <View style={styles.sectionContent}>
-              <ConsentRequests />
-            </View>
-          </View>
 
-          {/* Recent Activity Section */}
+
+          {/* Hoạt động Gần đây */}
           <View style={[styles.sectionWrapper, styles.lastSection]}>
             <View style={styles.sectionHeader}>
               <View style={styles.sectionHeaderLeft}>
                 <View style={styles.sectionIndicator} />
-                <Text style={styles.sectionTitle}>Recent Activity</Text>
+                <Text style={styles.sectionTitle}>Hoạt động Gần đây</Text>
               </View>
               <TouchableOpacity>
-                <Text style={styles.seeAllText}>View Timeline</Text>
+                <Text style={styles.seeAllText}>Xem thêm</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.sectionContent}>
@@ -150,7 +132,7 @@ export default function PatientHome() {
         </ScrollView>
 
         {/* Floating AI Button */}
-        <FloatingAIButton onPress={() => {}} />
+        <FloatingAIButton onPress={() => console.log('Mở AI Assistant')} />
       </View>
     </SafeAreaView>
   );
@@ -224,7 +206,7 @@ const styles = StyleSheet.create({
     width: 4,
     height: 20,
     borderRadius: 2,
-    backgroundColor: '#4F46E5',
+    backgroundColor: '#3A8AFF',
     marginRight: 12,
   },
   
@@ -238,7 +220,7 @@ const styles = StyleSheet.create({
   seeAllText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#4F46E5',
+    color: '#3A8AFF',
   },
   
   sectionContent: {

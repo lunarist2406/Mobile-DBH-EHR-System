@@ -172,7 +172,7 @@ const EHRCard3D: React.FC<Props> = ({ record, onSyncPress, compact = false }) =>
             <View style={styles.compactFooter}>
               <View style={[styles.verifiedBadge, { backgroundColor: `${theme.dark}50` }]}>
                 <ShieldCheck size={12} color="#FFFFFF" />
-                <Text style={styles.verifiedText}>VERIFIED</Text>
+                <Text style={styles.verifiedText}>{record.integrity_status}</Text>
               </View>
               <View style={styles.idBadge}>
                 <Text style={styles.idText}>#{record.ehr_id.split('-')[1]}</Text>
@@ -309,7 +309,7 @@ const EHRCard3D: React.FC<Props> = ({ record, onSyncPress, compact = false }) =>
                 <View style={styles.gridItem}>
                   <Text style={styles.blockchainLabel}>Status</Text>
                   <View style={styles.statusBadge}>
-                    <Text style={styles.statusText}>{record.integrity_status}ED</Text>
+                    <Text style={styles.statusText}>{record.integrity_status}</Text>
                   </View>
                 </View>
               </View>
@@ -664,7 +664,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 10,
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#4072c2',
   },
   viewDetailsText: {
     fontSize: 11,

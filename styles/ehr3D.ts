@@ -4,7 +4,7 @@ export const styles = StyleSheet.create({
   card: {
     height: 280,
     borderRadius: 32,
-    backgroundColor: '#1e3a8a',
+    backgroundColor: '#6278b3',
     padding: 20,
     shadowColor: '#000',
     shadowOpacity: 0.3,
