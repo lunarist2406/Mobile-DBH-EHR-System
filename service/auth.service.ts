@@ -1,11 +1,11 @@
-import { Role } from '@/types/types';
+import { RoleName } from "@/types/types";
 
 interface MockUser {
   id: string;
   fullName: string;
   email: string;
   password: string;
-  role: Role;
+  role: RoleName;
 }
 
 const mockUsers: MockUser[] = [

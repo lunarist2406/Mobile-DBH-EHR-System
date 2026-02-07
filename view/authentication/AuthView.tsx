@@ -7,13 +7,13 @@ import LoginForm from './components/LoginForm';
 import OTPForm from './components/OTPForm';
 import RegisterForm from './components/RegisterForm';
 
-import { AuthStep, Role } from '@/types/types';
+import { AuthStep, RoleName } from '@/types/types';
 
 export default function AuthView() {
   const [step, setStep] = useState<AuthStep>('LOGIN');
   const [email, setEmail] = useState('');
 
-  const handleLoginSuccess = (role: Role) => {
+  const handleLoginSuccess = (role: RoleName) => {
     if (role === 'PATIENT') {
       router.replace('patient' as any);   // đúng với app/(patient)/index.tsx
     } else {

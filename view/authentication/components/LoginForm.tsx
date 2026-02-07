@@ -1,5 +1,5 @@
 import { mockLogin } from '@/service/auth.service';
-import { Role } from '@/types/types';
+import { RoleName } from '@/types/types';
 import { Eye, EyeOff, Lock, Mail, ShieldCheck } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
@@ -7,11 +7,11 @@ import { Animated, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, V
 interface Props {
   onForgot: () => void;
   onRegister: () => void;
-   onSuccess: (role: Role) => void
+   onSuccess: (role: RoleName) => void
 }
 
 export default function LoginForm({ onForgot, onRegister, onSuccess }: Props) {
-  const [role, setRole] = useState<Role>('PATIENT');
+  const [role, setRole] = useState<RoleName>('PATIENT');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -208,36 +208,6 @@ export default function LoginForm({ onForgot, onRegister, onSuccess }: Props) {
               Forgot password?
             </Text>
           </Pressable>
-            {/* Role Selector (Mock) */}
-          <View style={{ flexDirection: 'row', marginBottom: 20 }}>
-            {(['PATIENT', 'DOCTOR'] as Role[]).map((r) => {
-              const active = role === r;
-              return (
-                <Pressable
-                  key={r}
-                  onPress={() => setRole(r)}
-                  style={{
-                    flex: 1,
-                    paddingVertical: 12,
-                    marginHorizontal: 6,
-                    borderRadius: 12,
-                    backgroundColor: active ? '#3A8AFF' : '#F3F4F6',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: active ? '#fff' : '#374151',
-                      fontWeight: '700',
-                    }}
-                  >
-                    {r === 'PATIENT' ? 'Patient' : 'Doctor'}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-
           {/* Sign In Button */}
           <Pressable
             style={({ pressed }) => [
