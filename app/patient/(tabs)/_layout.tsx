@@ -5,8 +5,6 @@ import {
     Search as SearchIcon,
     User,
     FileText,
-    Bell,
-    Shield
 } from 'lucide-react-native';
 import React from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
@@ -21,8 +19,18 @@ export default function TabsLayout() {
         tabBarStyle: [
           styles.tabBar,
           {
-            height: Platform.OS === 'ios' ? 84 : 70,
-            paddingBottom: Platform.OS === 'ios' ? insets.bottom : 12,
+            height: Platform.select({
+              ios: 84,
+              android: 68,
+            }),
+            paddingBottom: Platform.select({
+              ios: insets.bottom,
+              android: 8,
+            }),
+            paddingTop: Platform.select({
+              ios: 12,
+              android: 8,
+            }),
           }
         ],
         tabBarActiveTintColor: '#3A8AFF',
@@ -40,7 +48,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
               <Home 
-                size={22} 
+                size={Platform.select({ ios: 22, android: 20 })} 
                 color={focused ? '#3A8AFF' : color} 
                 fill={focused ? '#3A8AFF' : 'none'}
                 strokeWidth={focused ? 2.5 : 2}
@@ -56,7 +64,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
               <FileText 
-                size={22} 
+                size={Platform.select({ ios: 22, android: 20 })} 
                 color={focused ? '#3A8AFF' : color} 
                 fill={focused ? '#3A8AFF' : 'none'}
                 strokeWidth={focused ? 2.5 : 2}
@@ -72,7 +80,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
               <Calendar 
-                size={22} 
+                size={Platform.select({ ios: 22, android: 20 })} 
                 color={focused ? '#3A8AFF' : color} 
                 fill={focused ? '#3A8AFF' : 'none'}
                 strokeWidth={focused ? 2.5 : 2}
@@ -81,7 +89,6 @@ export default function TabsLayout() {
           ),
         }}
       />
-      {/* Sử dụng 'search' thay vì 'notifications' */}
       <Tabs.Screen
         name="search"
         options={{
@@ -89,7 +96,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
               <SearchIcon 
-                size={22} 
+                size={Platform.select({ ios: 22, android: 20 })} 
                 color={focused ? '#3A8AFF' : color} 
                 fill={focused ? '#3A8AFF' : 'none'}
                 strokeWidth={focused ? 2.5 : 2}
@@ -98,7 +105,6 @@ export default function TabsLayout() {
           ),
         }}
       />
-      {/* Sử dụng 'settings' thay vì 'profile' */}
       <Tabs.Screen
         name="settings"
         options={{
@@ -106,7 +112,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
               <User 
-                size={22} 
+                size={Platform.select({ ios: 22, android: 20 })} 
                 color={focused ? '#3A8AFF' : color} 
                 fill={focused ? '#3A8AFF' : 'none'}
                 strokeWidth={focused ? 2.5 : 2}
@@ -122,7 +128,7 @@ export default function TabsLayout() {
 const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
+    borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#E2E8F0',
     position: 'absolute',
     left: 0,
@@ -135,24 +141,26 @@ const styles = StyleSheet.create({
         shadowRadius: 12,
       },
       android: {
-        elevation: 16,
+        elevation: 8,
         borderTopWidth: 0,
       },
     }),
   },
   tabBarItem: {
-    paddingVertical: Platform.OS === 'ios' ? 12 : 8,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   tabBarLabel: {
-    fontSize: 11,
+    fontSize: Platform.select({ ios: 11, android: 10 }),
     fontWeight: '600',
-    marginTop: Platform.OS === 'ios' ? 2 : 4,
-    marginBottom: Platform.OS === 'ios' ? 0 : 4,
+    marginTop: Platform.select({ ios: 2, android: 4 }),
+    marginBottom: 0,
   },
   iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: Platform.select({ ios: 44, android: 40 }),
+    height: Platform.select({ ios: 44, android: 40 }),
+    borderRadius: Platform.select({ ios: 12, android: 10 }),
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',
@@ -167,7 +175,9 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
       },
       android: {
-        elevation: 2,
+        // Sử dụng border thay vì elevation để trông tinh tế hơn
+        borderWidth: 1.5,
+        borderColor: 'rgba(58, 138, 255, 0.2)',
       },
     }),
   },
