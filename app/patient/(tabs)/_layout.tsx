@@ -1,10 +1,10 @@
 import { Tabs } from 'expo-router';
 import {
-    Calendar,
-    Home,
-    Search as SearchIcon,
-    User,
-    FileText,
+  Bot,
+  Calendar,
+  FileText,
+  Home,
+  User
 } from 'lucide-react-native';
 import React from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
@@ -89,13 +89,13 @@ export default function TabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="search"
+      {/* <Tabs.Screen
+        name="aichat"
         options={{
-          title: 'Tìm kiếm',
+          title: 'AI',
           tabBarIcon: ({ color, size, focused }) => (
             <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
-              <SearchIcon 
+              <Bot 
                 size={Platform.select({ ios: 22, android: 20 })} 
                 color={focused ? '#3A8AFF' : color} 
                 fill={focused ? '#3A8AFF' : 'none'}
@@ -104,7 +104,7 @@ export default function TabsLayout() {
             </View>
           ),
         }}
-      />
+      /> */}
       <Tabs.Screen
         name="settings"
         options={{

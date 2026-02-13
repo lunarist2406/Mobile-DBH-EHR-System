@@ -3,7 +3,6 @@ import { ScrollView, StyleSheet, View, Text } from 'react-native';
 import { ShieldCheck } from 'lucide-react-native';
 
 import DoctorHeader from './components/DoctorHeader';
-import AISearchBar from '../../AIChat/AISearchBar';
 import { QuickActions } from './components/QuickActions';
 import { DoctorStats } from './components/DoctorStats';
 
@@ -17,14 +16,6 @@ export default function DoctorScreen() {
         {/* Header */}
         <DoctorHeader />
 
-        {/* AI Search */}
-        <View style={styles.section}>
-          <AISearchBar
-            onSearch={async (q) =>
-              `Dựa trên tìm kiếm "${q}", hệ thống tìm thấy 3 kết quả liên quan đến hồ sơ bệnh án và 2 kết quả xét nghiệm. Tất cả đã được xác thực và đồng bộ blockchain.`
-            }
-          />
-        </View>
 
         {/* Quick Actions */}
         <View style={styles.section}>

@@ -1,16 +1,16 @@
+// screens/PatientHome.tsx
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  SafeAreaView,
-  StatusBar,
-  TouchableOpacity,
   Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
-import FloatingAIButton from './components/FloatingAIButton';
 import { MOCK_PATIENT_DASHBOARD } from './ehr.mock';
 import AccessLogItem from './Ehr/component/accesslog';
 import { ACCESS_LOGS_UI } from '@/view/doctor/mock';
@@ -18,61 +18,65 @@ import ConsentRequests from './Ehr/component/consentRequest';
 import RecentActivity from './components/RecentActivity';
 import { PatientHeader } from './components/patientHeader';
 import EHRCard3D from './Ehr/EHRCard3D/EHRCard3D';
+import AIFloatingButton from '@/view/AiChat/AIFloating';
 
 export default function PatientHome() {
   const { insights } = MOCK_PATIENT_DASHBOARD;
-  
-  // Chỉ hiển thị 3 log gần nhất
   const recentLogs = ACCESS_LOGS_UI.slice(0, 3);
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar 
-        barStyle="dark-content" 
-        backgroundColor="#F8FAFC" 
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="#F8FAFC"
         translucent={Platform.OS === 'android'}
       />
-      
+
+      {/* 
+        ✅ Dùng position: 'relative' + zIndex để FAB nổi trên ScrollView
+        KHÔNG bọc thêm View nếu không cần — giữ cấu trúc gốc
+      */}
       <View style={styles.container}>
-        {/* Header Section */}
         <PatientHeader />
-        
-        <ScrollView 
+
+        <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-         <View style={styles.sectionWrapper}>
-          <EHRCard3D 
-            record={{
-              id: '1',
-              report_type: 'LAB',
-              current_version: 2,
-              patient: {
-                full_name: 'Nguyễn Văn An',
-                dob: '1985-06-15',
-                blood_type: 'O+',
-              },
-              hospital: {
-                name: 'Bệnh viện Đa khoa Thành phố',
-                license_number: 'BV-12345',
-              },
-              doctor: {
-                full_name: 'BS. Lê Thị Bình',
-                license_number: 'BS-67890',
-              },
-              created_at: '15-03-2024 10:30',
-              blockchain_tx_hash: '0x1a2b3c4d5e6f7890abcdef1234567890',
-              block_number: 1234567,
-              integrity_status: 'ĐÃ XÁC MINH',
-              file_hash: 'sha256:abcdef123456...',
-              ehr_id: 'EHR-2024-001',
-            }}
-            onSyncPress={() => console.log('Đồng bộ node')}
-          />
-        </View>
-          {/* Yêu cầu Đồng thuận */}
+          {/* EHR Card */}
+          <View style={styles.sectionWrapper}>
+            <EHRCard3D
+              record={{
+                id: '1',
+                report_type: 'LAB',
+                current_version: 2,
+                patient: {
+                  full_name: 'Nguyễn Văn An',
+                  dob: '1985-06-15',
+                  blood_type: 'O+',
+                },
+                hospital: {
+                  name: 'Bệnh viện Đa khoa Thành phố',
+                  license_number: 'BV-12345',
+                },
+                doctor: {
+                  full_name: 'BS. Lê Thị Bình',
+                  license_number: 'BS-67890',
+                },
+                created_at: '15-03-2024 10:30',
+                blockchain_tx_hash: '0x1a2b3c4d5e6f7890abcdef1234567890',
+                block_number: 1234567,
+                integrity_status: 'ĐÃ XÁC MINH',
+                file_hash: 'sha256:abcdef123456...',
+                ehr_id: 'EHR-2024-001',
+              }}
+              onSyncPress={() => console.log('Đồng bộ node')}
+            />
+          </View>
+
+          {/* Yêu cầu cấp quyền */}
           <View style={styles.sectionWrapper}>
             <View style={styles.sectionHeader}>
               <View style={styles.sectionHeaderLeft}>
@@ -87,6 +91,7 @@ export default function PatientHome() {
               <ConsentRequests />
             </View>
           </View>
+
           {/* Truy cập Gần đây */}
           <View style={styles.sectionWrapper}>
             <View style={styles.sectionHeader}>
@@ -109,8 +114,6 @@ export default function PatientHome() {
             </View>
           </View>
 
-
-
           {/* Hoạt động Gần đây */}
           <View style={[styles.sectionWrapper, styles.lastSection]}>
             <View style={styles.sectionHeader}>
@@ -127,12 +130,11 @@ export default function PatientHome() {
             </View>
           </View>
 
-          {/* Spacer cho floating button */}
           <View style={styles.bottomSpacer} />
         </ScrollView>
 
-        {/* Floating AI Button */}
-        <FloatingAIButton onPress={() => console.log('Mở AI Assistant')} />
+        {/* ✅ Floating AI Button — nổi trên tất cả, position absolute */}
+        <AIFloatingButton />
       </View>
     </SafeAreaView>
   );
@@ -143,21 +145,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8FAFC',
   },
-  
+
+  // ✅ position: 'relative' để AIFloatingButton dùng position: 'absolute' bên trong
   container: {
     flex: 1,
+    position: 'relative',
   },
-  
+
   scrollView: {
     flex: 1,
   },
-  
+
   scrollContent: {
     paddingHorizontal: 16,
     paddingBottom: 100,
     paddingTop: 8,
   },
-  
+
   sectionWrapper: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
@@ -168,10 +172,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#0F172A',
-        shadowOffset: {
-          width: 0,
-          height: 2,
-        },
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.04,
         shadowRadius: 12,
       },
@@ -180,11 +181,11 @@ const styles = StyleSheet.create({
       },
     }),
   },
-  
+
   lastSection: {
     marginBottom: 32,
   },
-  
+
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -196,12 +197,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F8FAFC',
   },
-  
+
   sectionHeaderLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  
+
   sectionIndicator: {
     width: 4,
     height: 20,
@@ -209,52 +210,34 @@ const styles = StyleSheet.create({
     backgroundColor: '#3A8AFF',
     marginRight: 12,
   },
-  
+
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
     color: '#1E293B',
     letterSpacing: -0.3,
   },
-  
+
   seeAllText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#3A8AFF',
   },
-  
+
   sectionContent: {
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
-  
+
   accessLogsContainer: {
     gap: 12,
   },
-  
+
   accessLogItem: {
     borderRadius: 12,
     overflow: 'hidden',
   },
-  
-  badgeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  
-  badge: {
-    backgroundColor: '#FEE2E2',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#DC2626',
-  },
-  
+
   bottomSpacer: {
     height: 32,
   },

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, TouchableOpacity, View, StyleSheet } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type TabBarProps = {
   activeTab: string;
@@ -8,7 +8,6 @@ type TabBarProps = {
 
 const TabBar: React.FC<TabBarProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
-    { id: 'all-appointments', label: 'Tất cả lịch hẹn' },
     { id: 'doctors', label: 'Tìm bác sĩ' },
     { id: 'hospitals', label: 'Tìm bệnh viện' },
   ] as const;

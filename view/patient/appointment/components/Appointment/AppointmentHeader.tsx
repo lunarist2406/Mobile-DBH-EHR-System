@@ -1,14 +1,14 @@
-import { Bell, Calendar } from 'lucide-react-native';
+import { Calendar, Bell } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface AppointmentHeaderProps {
-  onNotificationPress?: () => void;
+  onBellPress?: () => void;
   showBadge?: boolean;
 }
 
 export const AppointmentHeader: React.FC<AppointmentHeaderProps> = ({
-  onNotificationPress,
+  onBellPress,
   showBadge = true,
 }) => {
   return (
@@ -25,11 +25,11 @@ export const AppointmentHeader: React.FC<AppointmentHeaderProps> = ({
         </View>
         
         <TouchableOpacity 
-          style={styles.notificationButton}
-          onPress={onNotificationPress}
+          style={styles.bellButton}
+          onPress={onBellPress}
         >
           <Bell size={20} color="#64748B" />
-          {showBadge && <View style={styles.notificationBadge} />}
+          {showBadge && <View style={styles.bellBadge} />}
         </TouchableOpacity>
       </View>
     </View>
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     color: '#64748B',
     marginTop: 2,
   },
-  notificationButton: {
+  bellButton: {
     width: 44,
     height: 44,
     borderRadius: 12,
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
     position: 'relative',
   },
-  notificationBadge: {
+  bellBadge: {
     position: 'absolute',
     top: 10,
     right: 10,

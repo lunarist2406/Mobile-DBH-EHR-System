@@ -4,15 +4,16 @@ import {
     RefreshControl,
     SafeAreaView,
     ScrollView,
-    View,
     StyleSheet,
+    View,
 } from 'react-native';
 import AllAppointments from './components/Appointment/AllAppointments';
+import { AppointmentHeader } from './components/Appointment/AppointmentHeader';
+import ControllingAppointScreen from './components/Appointment/ControllingAppoint';
 import DoctorList from './components/Doctor/DoctorList';
+import EncounterList from './components/EncounterList';
 import HospitalList from './components/Hospital/HospitalList';
 import TabBar from './components/TabBar';
-import EncounterList from './components/EncounterList';
-import { AppointmentHeader } from './components/Appointment/AppointmentHeader';
 
 
 type TabType = 'appointments' | 'encounters' | 'doctors' | 'hospitals' | 'all-appointments';
@@ -61,7 +62,9 @@ const mockEncounters: Encounter[] = [
 export default function AppointmentsScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('appointments');
   const [refreshing, setRefreshing] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -69,7 +72,10 @@ export default function AppointmentsScreen() {
     await new Promise(resolve => setTimeout(resolve, 1000));
     setRefreshing(false);
   };
-
+    const handleBellPress = () => {
+    // Điều hướng đến màn hình thông báo
+    setShowNotifications(true);
+  };
   const handleNotificationPress = () => {
     console.log('Notification button pressed');
   };
@@ -83,8 +89,19 @@ export default function AppointmentsScreen() {
     console.log('Create appointment:', data);
     setShowCreateModal(false);
   };
-
+  const handleBackFromAppointment = () => {
+    setShowNotifications(false);
+  };
   const renderContent = () => {
+    if (showNotifications) {
+      return (
+        <ControllingAppointScreen
+          appointments={mockAppointments}
+          encounters={mockEncounters}
+          onBack={handleBackFromAppointment}
+        />
+      );
+    }
     switch (activeTab) {
       case 'appointments':
         return (
@@ -128,11 +145,13 @@ export default function AppointmentsScreen() {
         return null;
     }
   };
-
+if (showNotifications) {
+    return renderContent();
+  }
   return (
     <SafeAreaView style={styles.safeArea}>
       <AppointmentHeader 
-        onNotificationPress={handleNotificationPress}
+        onBellPress={handleBellPress}
         showBadge={true}
       />
 

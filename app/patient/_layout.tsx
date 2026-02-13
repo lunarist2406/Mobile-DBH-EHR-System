@@ -1,54 +1,55 @@
 import { Slot } from 'expo-router';
-import { Platform, SafeAreaView, StatusBar, StyleSheet, View } from 'react-native';
+import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PatientLayout() {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar 
-        barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'}
-        backgroundColor={Platform.OS === 'ios' ? '#FFFFFF' : '#0F2A5F'}
-        translucent={Platform.OS === 'android'} // Android: cho phép content chạy dưới status bar
-      />
-      <View style={[
-        styles.container,
-        Platform.OS === 'android' && StatusBar.currentHeight ? {
-          paddingTop: StatusBar.currentHeight, // Bù padding cho Android khi status bar translucent
-        } : undefined
-      ]}>
+    // SafeAreaProvider bọc ngoài để cung cấp insets chính xác
+    <SafeAreaProvider>
+      {/* 
+        ✅ FIX GÓC BO TRÒN:
+        View ngoài cùng dùng backgroundColor của HỆ THỐNG (đen/trong suốt)
+        KHÔNG đặt bg trắng ở đây — nếu không nó sẽ lấp góc bo tròn
+      */}
+      <View style={styles.root}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor="transparent"
+          translucent={true} // Cả iOS lẫn Android đều transparent
+        />
 
-        {/* Nội dung chính */}
-        <View style={styles.content}>
-          <Slot />
-        </View>
+        {/* 
+          SafeAreaView chỉ lo padding nội dung, KHÔNG lo màu nền hệ thống
+          edges: chỉ apply safe area cho top/left/right, KHÔNG bottom
+          (bottom được xử lý bởi tab bar với insets.bottom)
+        */}
+        <SafeAreaView
+          style={styles.safeArea}
+          edges={['top', 'left', 'right']}
+        >
+          <View style={styles.content}>
+            <Slot />
+          </View>
+        </SafeAreaView>
       </View>
-    </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
+  // ── Root: toàn màn hình, nền trắng (hiển thị sau SafeArea) ──
+  root: {
+    flex: 1,
+    backgroundColor: '#FFFFFF', // Nền chính của app
+  },
+
+  // ── SafeAreaView: chỉ xử lý padding, không cần backgroundColor ──
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'transparent',
   },
-  container: {
-    flex: 1,
-  },
-  header: {
-    backgroundColor: '#0F2A5F',
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
-  },
+
+  // ── Content area ──
   content: {
     flex: 1,
     backgroundColor: '#F8FAFC',
